@@ -4,6 +4,8 @@ import Tokens from '#models/tokens.js';
 import { randomKey } from '#lib/crypto.js';
 
 export default async function generateTokens(req, res) {
+    if (!req.query.redirect) return res.status(400).json({ error: 'Missing redirect location' });
+
     let authMethod = req.query.method || 'cloud';
     if (authMethod !== 'cloud' && authMethod !== 'comment') authMethod = 'cloud';
 
@@ -29,6 +31,7 @@ export default async function generateTokens(req, res) {
     const authData = {
         publicCode: publicCode.toString(),
         privateCode: (await randomKey(48)).toString('hex'),
+        redirectLocation: Buffer.from(req.query.redirect, 'base64').toString('utf-8'),
         method: authMethod,
         authProject: AUTH_PROJECT.id,
     };

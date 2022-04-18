@@ -12,6 +12,8 @@ export default async function oneClickSignIn(req, res) {
         return res.status(200).json(list);
     }
     if (method === 'POST') {
+        if (!req.query.redirect) return res.status(400).json({ error: 'Missing redirect location' });
+
         // Generate an instant sign in code for one click sign in
 
         // Verify that the given account can be used for one click sign in
@@ -23,7 +25,13 @@ export default async function oneClickSignIn(req, res) {
 
         // Generate an instant sign in code
         let instantPrivateCode = (await randomKey(64)).toString('hex');
-        await Tokens.create({ username: account.username, privateCode: instantPrivateCode, type: 'instant', created: new Date().toISOString() });
+        await Tokens.create({
+            username: account.username,
+            privateCode: instantPrivateCode,
+            type: 'instant',
+            redirectLocation: Buffer.from(req.query.redirect, 'base64').toString('utf-8'),
+            created: new Date().toISOString(),
+        });
 
         // Update the token expiry date
         await OneClickSignIn.updateOne({ username: account.username, token: req.headers.authorization }, { updated: new Date().toISOString() });

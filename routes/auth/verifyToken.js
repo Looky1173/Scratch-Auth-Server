@@ -4,7 +4,7 @@ import Tokens from '#models/tokens.js';
 import OneClickSignIn from '#models/oneClickSignIn.js';
 import { randomKey, getUUID } from '#lib/crypto.js';
 
-function getOneClickSignInTokenAndAddAccount(authorization, username) {
+function getOneClickSignInTokenAndAddAccount(authorization, username, redirect) {
     return new Promise(async (resolve, reject) => {
         let token = await OneClickSignIn.findOne({ token: authorization });
 
@@ -20,16 +20,23 @@ function getOneClickSignInTokenAndAddAccount(authorization, username) {
         }
 
         let instantPrivateCode = (await randomKey(64)).toString('hex');
-        Tokens.create({ username: username, privateCode: instantPrivateCode, type: 'instant', created: new Date().toISOString() });
+        Tokens.create({ username: username, privateCode: instantPrivateCode, type: 'instant', redirectLocation: Buffer.from(redirect, 'base64').toString('utf-8'), created: new Date().toISOString() });
 
         resolve({ token: token, instantPrivateCode: instantPrivateCode });
     });
 }
 
 export default async function verifyToken(req, res) {
+    let redirect = null;
+    if (Boolean(req.query.oneClickSignIn) === true) {
+        if (!req.query.redirect) return res.status(400).json({ error: 'Missing redirect location' });
+        redirect = req.query.redirect;
+    }
+
     let response = {
         valid: false,
         username: null,
+        redirect: null,
     };
     const auth = await Tokens.findOne({ privateCode: req.params.privateCode });
 
@@ -42,6 +49,7 @@ export default async function verifyToken(req, res) {
             valid: true,
             username: auth.username,
             type: 'instant',
+            redirect: auth.redirectLocation,
         };
         return res.status(200).json(response);
     }
@@ -53,9 +61,10 @@ export default async function verifyToken(req, res) {
                     response = {
                         valid: true,
                         username: cloudItem.user,
+                        redirect: auth.redirectLocation,
                     };
                     if (Boolean(req.query.oneClickSignIn) === true) {
-                        let oneClickSignIn = await getOneClickSignInTokenAndAddAccount(req.headers?.authorization, response.username);
+                        let oneClickSignIn = await getOneClickSignInTokenAndAddAccount(req.headers?.authorization, response.username, redirect);
                         response['oneClickSignInToken'] = oneClickSignIn.token;
                         response['instantPrivateCode'] = oneClickSignIn.instantPrivateCode;
                     }
@@ -71,9 +80,10 @@ export default async function verifyToken(req, res) {
                     response = {
                         valid: true,
                         username: comment.author.username,
+                        redirect: auth.redirectLocation,
                     };
                     if (Boolean(req.query.oneClickSignIn) === true) {
-                        let oneClickSignIn = await getOneClickSignInTokenAndAddAccount(req.headers?.authorization, response.username);
+                        let oneClickSignIn = await getOneClickSignInTokenAndAddAccount(req.headers?.authorization, response.username, redirect);
                         response['oneClickSignInToken'] = oneClickSignIn.token;
                         response['instantPrivateCode'] = oneClickSignIn.instantPrivateCode;
                     }
