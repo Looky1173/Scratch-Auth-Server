@@ -56,6 +56,7 @@ export default async function verifyToken(req, res) {
 
     if (auth.method === 'cloud') {
         queue.add(queue.TYPES.CloudDataVerification).then(async (data) => {
+            data = data.reverse();
             for (let cloudItem of data) {
                 if (cloudItem.value == auth.publicCode) {
                     response = {
@@ -75,6 +76,7 @@ export default async function verifyToken(req, res) {
         });
     } else if (auth.method === 'comment') {
         queue.add(queue.TYPES.CommentVerification).then(async (data) => {
+            data = data.reverse();
             for (let comment of data) {
                 if (comment.content == auth.publicCode) {
                     response = {
