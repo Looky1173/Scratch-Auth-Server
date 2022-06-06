@@ -6,7 +6,7 @@ const TokensSchema = new mongoose.Schema(
         publicCode: { type: String, required: false },
         privateCode: { type: String, required: true },
         redirectLocation: { type: String, required: true },
-        method: { type: String, enum: ['cloud', 'comment'], required: false },
+        method: { type: String, enum: ['cloud', 'comment', 'profile-comment'], required: false },
         type: { type: String, enum: ['normal', 'instant'], default: 'normal', required: true },
         created: { type: Date, required: true },
     },
