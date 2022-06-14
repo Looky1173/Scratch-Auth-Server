@@ -1,5 +1,5 @@
 import queue from '#lib/queue.js';
-
+import registerAnalyticsEvent from '#lib/analytics.js';
 import Tokens from '#models/tokens.js';
 import OneClickSignIn from '#models/oneClickSignIn.js';
 import { randomKey, getUUID } from '#lib/crypto.js';
@@ -11,9 +11,11 @@ function getOneClickSignInTokenAndAddAccount(authorization, username, redirect) 
         if (token === null) {
             token = getUUID();
             await OneClickSignIn.create({ username: username, token: token, updated: new Date().toISOString() });
+            registerAnalyticsEvent('added-one-click-sign-in-accounts');
         } else if (!((await OneClickSignIn.countDocuments({ username: username })) > 0)) {
             token = authorization;
             await OneClickSignIn.create({ username: username, token: authorization, updated: new Date().toISOString() });
+            registerAnalyticsEvent('added-one-click-sign-in-accounts');
         } else {
             token = authorization;
             await OneClickSignIn.updateOne({ username: username, token: authorization }, { updated: new Date().toISOString() });
@@ -69,7 +71,8 @@ export default async function verifyToken(req, res) {
                         response['oneClickSignInToken'] = oneClickSignIn.token;
                         response['instantPrivateCode'] = oneClickSignIn.instantPrivateCode;
                     }
-                    return res.status(200).json(response);
+                    res.status(200).json(response);
+                    return registerAnalyticsEvent('verified-cloud');
                 }
             }
             return res.status(403).json(response);
@@ -89,7 +92,8 @@ export default async function verifyToken(req, res) {
                         response['oneClickSignInToken'] = oneClickSignIn.token;
                         response['instantPrivateCode'] = oneClickSignIn.instantPrivateCode;
                     }
-                    return res.status(200).json(response);
+                    res.status(200).json(response);
+                    return registerAnalyticsEvent('verified-comment');
                 }
             }
             return res.status(403).json(response);
@@ -108,7 +112,8 @@ export default async function verifyToken(req, res) {
                         response['oneClickSignInToken'] = oneClickSignIn.token;
                         response['instantPrivateCode'] = oneClickSignIn.instantPrivateCode;
                     }
-                    return res.status(200).json(response);
+                    res.status(200).json(response);
+                    return registerAnalyticsEvent('verified-profile-comment');
                 }
             }
             return res.status(403).json(response);

@@ -47,6 +47,9 @@ app.use('/auth/verifyToken/:privateCode', asyncMiddleware(verifyToken));
 import oneClickSignIn from '#routes/auth/oneClickSignIn.js';
 app.use('/auth/oneClickSignIn/:username?', asyncMiddleware(oneClickSignIn));
 
+import analytics from '#routes/auth/analytics.js';
+app.use('/analytics', asyncMiddleware(analytics));
+
 app.get('/', (req, res) => res.status(200).json({ meta: { version: 'v1', time: new Date() } }));
 
 app.get(

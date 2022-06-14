@@ -1,7 +1,7 @@
 import { AUTH_PROJECT } from '#lib/constants.js';
-
-import Tokens from '#models/tokens.js';
+import registerAnalyticsEvent from '#lib/analytics.js';
 import { randomKey } from '#lib/crypto.js';
+import Tokens from '#models/tokens.js';
 
 export default async function generateTokens(req, res) {
     if (!req.query.redirect) return res.status(400).json({ error: 'Missing redirect location' });
@@ -46,4 +46,6 @@ export default async function generateTokens(req, res) {
     await Tokens.create({ ...authData, created: new Date().toISOString() });
 
     res.status(200).json(authData);
+
+    await registerAnalyticsEvent(authMethod);
 }

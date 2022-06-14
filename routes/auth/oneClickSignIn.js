@@ -2,6 +2,7 @@ import Tokens from '#models/tokens.js';
 import OneClickSignIn from '#models/oneClickSignIn.js';
 import { ONE_CLICK_SIGN_IN_ACCOUNT_VALIDITY } from '#lib/constants.js';
 import { randomKey } from '#lib/crypto.js';
+import registerAnalyticsEvent from '#lib/analytics.js';
 
 export default async function oneClickSignIn(req, res) {
     const method = req.method;
@@ -36,7 +37,9 @@ export default async function oneClickSignIn(req, res) {
         // Update the token expiry date
         await OneClickSignIn.updateOne({ username: account.username, token: req.headers.authorization }, { updated: new Date().toISOString() });
 
-        return res.status(200).json({ instantPrivateCode: instantPrivateCode });
+        res.status(200).json({ instantPrivateCode: instantPrivateCode });
+        
+        return await registerAnalyticsEvent('one-click-sign-in');
     }
     if (method === 'DELETE') {
         // Remove all or a specified account from the one click sign in database with a given authorization token
