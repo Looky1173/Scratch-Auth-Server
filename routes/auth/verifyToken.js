@@ -22,7 +22,14 @@ function getOneClickSignInTokenAndAddAccount(authorization, username, redirect) 
         }
 
         let instantPrivateCode = (await randomKey(64)).toString('hex');
-        Tokens.create({ username: username, privateCode: instantPrivateCode, type: 'instant', redirectLocation: Buffer.from(redirect, 'base64').toString('utf-8'), created: new Date().toISOString() });
+        await Tokens.create({
+            username: username,
+            privateCode: instantPrivateCode,
+            type: 'instant',
+            redirectLocation: Buffer.from(redirect, 'base64').toString('utf-8'),
+            created: new Date().toISOString(),
+        });
+        registerAnalyticsEvent('one-click-sign-in');
 
         resolve({ token: token, instantPrivateCode: instantPrivateCode });
     });
