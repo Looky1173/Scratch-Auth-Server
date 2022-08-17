@@ -40,7 +40,7 @@ export default async function generateTokens(req, res) {
     if (authMethod === 'profile-comment') {
         authData = { ...authData, username: req.query.username };
     } else {
-        authData = { ...authData, authProject: AUTH_PROJECT.id };
+        authData = { ...authData, authProject: req.query.authProject || AUTH_PROJECT.id };
     }
 
     await Tokens.create({ ...authData, created: new Date().toISOString() });

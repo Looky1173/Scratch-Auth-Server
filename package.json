@@ -7,7 +7,9 @@
     "type": "module",
     "scripts": {
         "start": "node .",
+        "start-cleanup": "node cleanup.js",
         "dev": "nodemon .",
+        "dev-cleanup": "nodemon cleanup.js",
         "debug": "nodemon --inspect ."
     },
     "imports": {

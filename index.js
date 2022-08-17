@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import mongoose from 'mongoose';
 
-import { CLEAN_UP_TOKENS_INTERVAL, CLEAN_UP_ONE_CLICK_SIGN_IN_ACCOUNTS_INTERVAL } from '#lib/constants.js';
+import { PORT } from '#lib/constants.js';
 
 // Connect to MongoDB
 mongoose
@@ -15,7 +15,6 @@ mongoose
     });
 
 const app = express();
-const PORT = 8080;
 
 app.use(express.json());
 
@@ -50,7 +49,7 @@ app.use('/auth/oneClickSignIn/:username?', asyncMiddleware(oneClickSignIn));
 import analytics from '#routes/auth/analytics.js';
 app.use('/analytics', asyncMiddleware(analytics));
 
-app.get('/', (req, res) => res.status(200).json({ meta: { version: 'v1', time: new Date() } }));
+app.get('/', (req, res) => res.status(200).json({ meta: { version: 'v1', time: new Date(), cleanup: false } }));
 
 app.get(
     '/testError',
@@ -62,9 +61,3 @@ app.get(
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}...`);
 });
-
-// Clean up tokens and one click sign in accounts on a regular interval
-import cleanUpTokens from '#lib/cleanUpTokens.js';
-import cleanUpAccounts from '#lib/cleanUpAccounts.js';
-setInterval(cleanUpTokens, CLEAN_UP_TOKENS_INTERVAL);
-setInterval(cleanUpAccounts, CLEAN_UP_ONE_CLICK_SIGN_IN_ACCOUNTS_INTERVAL);

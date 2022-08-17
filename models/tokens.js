@@ -8,6 +8,7 @@ const TokensSchema = new mongoose.Schema(
         redirectLocation: { type: String, required: true },
         method: { type: String, enum: ['cloud', 'comment', 'profile-comment'], required: false },
         type: { type: String, enum: ['normal', 'instant'], default: 'normal', required: true },
+        authProject: { type: Number, required: false },
         created: { type: Date, required: true },
     },
     { collection: 'tokens', versionKey: false },

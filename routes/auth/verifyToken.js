@@ -64,7 +64,7 @@ export default async function verifyToken(req, res) {
     }
 
     if (auth.method === 'cloud') {
-        queue.add(queue.TYPES.CloudDataVerification).then(async (data) => {
+        queue.add(queue.TYPES.CloudDataVerification, { authProject: auth.authProject }).then(async (data) => {
             data = data.reverse();
             for (let cloudItem of data) {
                 if (cloudItem.value == auth.publicCode) {
@@ -85,7 +85,7 @@ export default async function verifyToken(req, res) {
             return res.status(403).json(response);
         });
     } else if (auth.method === 'comment') {
-        queue.add(queue.TYPES.CommentVerification).then(async (data) => {
+        queue.add(queue.TYPES.CommentVerification, { authProject: auth.authProject }).then(async (data) => {
             data = data.reverse();
             for (let comment of data) {
                 if (comment.content == auth.publicCode) {
