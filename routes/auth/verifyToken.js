@@ -108,7 +108,7 @@ export default async function verifyToken(req, res) {
     } else if (auth.method === 'profile-comment') {
         queue.add(queue.TYPES.ProfileCommentVerification, { username: auth.username }).then(async (data) => {
             for (let comment of data) {
-                if (comment.text == auth.publicCode && comment.author == auth.username) {
+                if (comment.text == auth.publicCode && comment.author.toLowerCase() === auth.username.toLowerCase()) {
                     response = {
                         valid: true,
                         username: comment.author,
